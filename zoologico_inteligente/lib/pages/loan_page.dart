@@ -1,58 +1,98 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class LoanPage extends StatefulWidget {
-  const LoanPage({super.key});
+class CreditsSummaryPage extends StatefulWidget {
+  const CreditsSummaryPage({super.key});
 
   @override
-  State<LoanPage> createState() => _LoanPageState();
+  State<CreditsSummaryPage> createState() => _CreditsSummaryPageState();
 }
 
-class _LoanPageState extends State<LoanPage> {
-  String loanType = 'Personal';
-  String amountText = '';
-  String monthsText = '';
+class _CreditsSummaryPageState extends State<CreditsSummaryPage> {
+  String subjectsCountText = '';
+  int subjectsCount = 0;
+
+  final List<TextEditingController> subjectNameControllers = [];
+  final List<TextEditingController> creditsControllers = [];
+
   String resultText = '';
 
-  void calculateLoan() {
-    final amount = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
-    final months = double.tryParse(monthsText.replaceAll(',', '.')) ?? 0.0;
+  void _generateSubjects() {
+    final parsed = int.tryParse(subjectsCountText) ?? 0;
 
-    if (amount <= 0 || months <= 0) {
+    if (parsed <= 0 || parsed > 8) {
       setState(() {
-        resultText = 'Ingrese valores válidos';
+        resultText = 'Ingrese una cantidad de materias entre 1 y 8';
+        subjectsCount = 0;
+        subjectNameControllers.clear();
+        creditsControllers.clear();
       });
       return;
     }
 
-    double monthlyRate = 0.0;
+    subjectsCount = parsed;
+    subjectNameControllers.clear();
+    creditsControllers.clear();
 
-    if (loanType == 'Personal') {
-      monthlyRate = 2.0;
-    } else if (loanType == 'Hipotecario') {
-      monthlyRate = 1.0;
-    } else if (loanType == 'Automotriz') {
-      monthlyRate = 1.5;
+    for (int i = 0; i < subjectsCount; i++) {
+      subjectNameControllers.add(TextEditingController());
+      creditsControllers.add(TextEditingController());
     }
 
-    final totalInterest = amount * (monthlyRate / 100) * months;
-    final totalToPay = amount + totalInterest;
-    final monthlyPayment = totalToPay / months;
+    setState(() {
+      resultText = 'Ingrese nombre y créditos para cada materia.';
+    });
+  }
+
+  void _calculateCredits() {
+    if (subjectsCount == 0) {
+      setState(() {
+        resultText = 'Primero indique cuántas materias tiene y genere el formulario.';
+      });
+      return;
+    }
+
+    int totalCredits = 0;
+    final List<String> lines = [];
+
+    for (int i = 0; i < subjectsCount; i++) {
+      final name = subjectNameControllers[i].text.trim().isEmpty
+          ? 'Materia ${i + 1}'
+          : subjectNameControllers[i].text.trim();
+
+      final credits = int.tryParse(
+            creditsControllers[i].text.trim(),
+          ) ??
+          0;
+
+      totalCredits += credits;
+      lines.add('- $name: $credits kg');
+    }
 
     setState(() {
       resultText =
-        'Tipo: $loanType\n'
-        'Interés total: \$${totalInterest.toStringAsFixed(2)}\n'
-        'Total a pagar: \$${totalToPay.toStringAsFixed(2)}\n'
-        'Cuota mensual: \$${monthlyPayment.toStringAsFixed(2)}';
+        'Animales registradas:\n'
+        '${lines.join('\n')}\n\n'
+        'Total de alimento diario: $totalCredits\n';
     });
+  }
+
+  @override
+  void dispose() {
+    for (final c in subjectNameControllers) {
+      c.dispose();
+    }
+    for (final c in creditsControllers) {
+      c.dispose();
+    }
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Simulador de préstamo'),
+        title: const Text('Calculadora de alimento diario'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/'),
@@ -60,75 +100,86 @@ class _LoanPageState extends State<LoanPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Cálculo aproximado de préstamo',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-
-            DropdownButton<String>(
-              value: loanType,
-              isExpanded: true,
-              items: const [
-                DropdownMenuItem(
-                  value: 'Personal',
-                  child: Text('Préstamo personal'),
-                ),
-                DropdownMenuItem(
-                  value: 'Hipotecario',
-                  child: Text('Préstamo hipotecario'),
-                ),
-                DropdownMenuItem(
-                  value: 'Automotriz',
-                  child: Text('Préstamo automotriz'),
-                ),
-              ],
-              onChanged: (value) {
-                if (value == null) return;
-                setState(() {
-                  loanType = value;
-                });
-              },
-            ),
-
-            const SizedBox(height: 16),
-
-            TextField(
-              decoration: const InputDecoration(
-                labelText: 'Monto del préstamo (\$)',
-                border: OutlineInputBorder(),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Número de animales para calcular',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              keyboardType: TextInputType.number,
-              onChanged: (value) {
-                amountText = value;
-              },
-            ),
+              const SizedBox(height: 12),
 
-            const SizedBox(height: 16),
-
-            TextField(
-              decoration: const InputDecoration(
-                labelText: 'Plazo (meses)',
-                border: OutlineInputBorder(),
+              TextField(
+                decoration: const InputDecoration(
+                  labelText: 'Cantidad de manimales (1 - 8)',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  subjectsCountText = value;
+                },
               ),
-              keyboardType: TextInputType.number,
-              onChanged: (value) {
-                monthsText = value;
-              },
-            ),
 
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: calculateLoan,
-              child: const Text('Calcular'),
-            ),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: _generateSubjects,
+                child: const Text('Generar animales'),
+              ),
 
-            const SizedBox(height: 16),
-            Text(resultText),
-          ],
+              const SizedBox(height: 16),
+
+              if (subjectsCount > 0)
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: subjectsCount,
+                  itemBuilder: (context, index) {
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 6),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: TextField(
+                                controller: subjectNameControllers[index],
+                                decoration: InputDecoration(
+                                  labelText: 'Animal ${index + 1}',
+                                  border: const OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: TextField(
+                                controller: creditsControllers[index],
+                                decoration: const InputDecoration(
+                                  labelText: 'Alimento en kg',
+                                  border: OutlineInputBorder(),
+                                ),
+                                keyboardType: TextInputType.number,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+
+              const SizedBox(height: 16),
+              if (subjectsCount > 0)
+                ElevatedButton(
+                  onPressed: _calculateCredits,
+                  child: const Text('Calcular alimento total'),
+                ),
+
+              const SizedBox(height: 16),
+              Text(resultText),
+            ],
+          ),
         ),
       ),
     );

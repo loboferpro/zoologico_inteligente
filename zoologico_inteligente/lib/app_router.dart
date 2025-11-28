@@ -17,7 +17,7 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/loan',
-      builder: (_, __) => const LoanPage(),
+      builder: (_, __) => const CreditsSummaryPage(),
     ),
     GoRoute(
       path: '/atm',

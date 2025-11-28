@@ -39,6 +39,12 @@ class BankHomePage extends StatelessWidget {
               onPressed: () => context.go('/atm'),
               child: const Text('Favoritos del zoológico'),
             ),
+            const SizedBox(height: 12),
+
+            ElevatedButton(
+              onPressed: () => context.go('/atm'),
+              child: const Text('Plan dinámico de alimentación semanal'),
+            ),
           ],
         ),
       ),
