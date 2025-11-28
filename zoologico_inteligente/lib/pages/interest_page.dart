@@ -14,34 +14,44 @@ class _InterestPageState extends State<InterestPage> {
   String resultText = '';
 
   void calculateInterest() {
-    final amount = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
+    
+    
+    List<String> _images = [];
 
-    if (amount <= 0) {
-      setState(() {
-        resultText = 'Ingrese un monto válido';
-      });
-      return;
-    }
-
-    double rate = 0.0;
-
+    
     if (accountType == 'Ahorros') {
-      rate = 3.0;
+      _images = [
+        'Tigre',
+        'Mono',
+        'Hipopotamo',
+      ];
     } else if (accountType == 'Corriente') {
-      rate = 1.0;
+      _images = [
+        'Elefante',
+        'Girafa',
+        'Sebra',
+      ];
     } else if (accountType == 'Plazo fijo') {
-      rate = 5.0;
+      _images = [
+        'Delfin',
+        'Tiburon',
+        'Ballena',
+      ];
+    } else if (accountType == 'Aviario') {
+      _images = [
+        'Colibríes',
+        'Loros',
+        'Gaviotas',
+      ];
     }
 
-    final interest = amount * rate / 100;
-    final total = amount + interest;
-
+    
     setState(() {
-      resultText =
-        'Tipo: $accountType\n'
-        'Interés anual: ${rate.toStringAsFixed(1)} %\n'
-        'Interés ganado: \$${interest.toStringAsFixed(2)}\n'
-        'Monto total: \$${total.toStringAsFixed(2)}';
+      resultText = _images.join(', ');
+        print('Animales del Habitad');
+      for (var i = 0; i < _images.length; i++) {
+        print(_images[i]);
+      }
     });
   }
 
@@ -61,15 +71,15 @@ class _InterestPageState extends State<InterestPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    'assets/images/zoo.jpg',
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                  ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  'assets/images/zoo.jpg',
+                  fit: BoxFit.cover,
+                  width: double.infinity,
                 ),
               ),
+            ),
             const SizedBox(height: 16),
             const Text(
               'Elegir hábitat',
@@ -83,15 +93,19 @@ class _InterestPageState extends State<InterestPage> {
               items: const [
                 DropdownMenuItem(
                   value: 'Ahorros',
-                  child: Text('Cuenta de ahorros'),
+                  child: Text('Selva'),
                 ),
                 DropdownMenuItem(
                   value: 'Corriente',
-                  child: Text('Cuenta corriente'),
+                  child: Text('Sabana'),
                 ),
                 DropdownMenuItem(
                   value: 'Plazo fijo',
-                  child: Text('Depósito a plazo fijo'),
+                  child: Text('Acuático'),
+                ),
+                DropdownMenuItem(
+                  value: 'Aviario',
+                  child: Text('Aviario'),
                 ),
               ],
               onChanged: (value) {
@@ -103,26 +117,16 @@ class _InterestPageState extends State<InterestPage> {
             ),
 
             const SizedBox(height: 16),
-
-            TextField(
-              decoration: const InputDecoration(
-                labelText: 'Monto inicial (\$)',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-              onChanged: (value) {
-                amountText = value;
-              },
-            ),
-
-            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: calculateInterest,
-              child: const Text('Calcular'),
+              child: const Text('Presentar Animales'),
             ),
 
             const SizedBox(height: 16),
-            Text(resultText),
+            Text(
+              resultText,
+              style: const TextStyle(fontSize: 18),
+            ),
           ],
         ),
       ),
