@@ -4,6 +4,7 @@ import 'pages/bank_home_page.dart';
 import 'pages/interest_page.dart';
 import 'pages/loan_page.dart';
 import 'pages/atm_fee_page.dart';
+import 'pages/animales.dart';
 
 final GoRouter appRouter = GoRouter(
   routes: [
@@ -22,6 +23,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/atm',
       builder: (_, __) => const AtmFeePage(),
+    ),
+    GoRoute(
+      path: '/animales',
+      builder: (_, __) => const AnimalsPage(),
     ),
   ],
 );

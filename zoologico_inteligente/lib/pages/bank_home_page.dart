@@ -42,7 +42,7 @@ class BankHomePage extends StatelessWidget {
             const SizedBox(height: 12),
 
             ElevatedButton(
-              onPressed: () => context.go('/atm'),
+              onPressed: () => context.go('/animales'),
               child: const Text('Plan dinámico de alimentación semanal'),
             ),
           ],

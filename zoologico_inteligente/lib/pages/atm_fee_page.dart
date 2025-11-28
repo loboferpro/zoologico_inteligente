@@ -9,37 +9,28 @@ class AtmFeePage extends StatefulWidget {
 }
 
 class _AtmFeePageState extends State<AtmFeePage> {
-  String cardType = 'Débito nacional';
-  String amountText = '';
-  String resultText = '';
+  final TextEditingController animalController = TextEditingController();
+  final List<String> favorites = [];
 
-  void calculateAtmFee() {
-    final amount = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
+  void addFavorite() {
+    final animal = animalController.text.trim();
 
-    if (amount <= 0) {
-      setState(() {
-        resultText = 'Ingrese un monto válido';
-      });
+    if (animal.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ingrese el nombre de un animal')),
+      );
       return;
     }
 
-    double fee = 0.0;
-
-    if (cardType == 'Débito nacional') {
-      fee = 0.5;
-    } else if (cardType == 'Débito internacional') {
-      fee = 1.5;
-    } else if (cardType == 'Crédito') {
-      fee = 2.0;
-    }
-
-    final total = amount + fee;
-
     setState(() {
-      resultText =
-        'Tarjeta: $cardType\n'
-        'Comisión: \$${fee.toStringAsFixed(2)}\n'
-        'Total debitado: \$${total.toStringAsFixed(2)}';
+      favorites.add(animal);
+      animalController.clear();
+    });
+  }
+
+  void removeFavorite(int index) {
+    setState(() {
+      favorites.removeAt(index);
     });
   }
 
@@ -47,7 +38,7 @@ class _AtmFeePageState extends State<AtmFeePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Comisión de cajero'),
+        title: const Text('Favoritos del zoológico'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/'),
@@ -59,57 +50,55 @@ class _AtmFeePageState extends State<AtmFeePage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'Cálculo de comisión en cajero',
+              'Agrega tus animales favoritos',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-
-            DropdownButton<String>(
-              value: cardType,
-              isExpanded: true,
-              items: const [
-                DropdownMenuItem(
-                  value: 'Débito nacional',
-                  child: Text('Tarjeta débito nacional'),
-                ),
-                DropdownMenuItem(
-                  value: 'Débito internacional',
-                  child: Text('Tarjeta débito internacional'),
-                ),
-                DropdownMenuItem(
-                  value: 'Crédito',
-                  child: Text('Tarjeta de crédito'),
-                ),
-              ],
-              onChanged: (value) {
-                if (value == null) return;
-                setState(() {
-                  cardType = value;
-                });
-              },
             ),
 
             const SizedBox(height: 16),
 
             TextField(
+              controller: animalController,
               decoration: const InputDecoration(
-                labelText: 'Monto a retirar (\$)',
+                labelText: 'Nombre del animal',
                 border: OutlineInputBorder(),
               ),
-              keyboardType: TextInputType.number,
-              onChanged: (value) {
-                amountText = value;
-              },
             ),
 
             const SizedBox(height: 16),
+
             ElevatedButton(
-              onPressed: calculateAtmFee,
-              child: const Text('Calcular'),
+              onPressed: addFavorite,
+              child: const Text('Agregar a favoritos'),
             ),
 
-            const SizedBox(height: 16),
-            Text(resultText),
+            const SizedBox(height: 20),
+
+            Text(
+              "Total de animales favoritos: ${favorites.length}",
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            Expanded(
+              child: ListView.builder(
+                itemCount: favorites.length,
+                itemBuilder: (context, index) {
+                  return Card(
+                    child: ListTile(
+                      title: Text(favorites[index]),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => removeFavorite(index),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
